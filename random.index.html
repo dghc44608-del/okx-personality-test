@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKX人格测试器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+        }
+        
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 背景网格效果 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(188, 255, 47, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(188, 255, 47, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background-color: #BCFF2F;
+            box-shadow: 0 0 10px #07FF4D;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            color: #888888;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+        
+        /* 主按钮样式 */
+        .main-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: #000000;
+            border: 2px solid #BCFF2F;
+            color: #BCFF2F;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+            margin-bottom: 60px;
+            letter-spacing: 2px;
+            box-shadow: 0 0 0 0 rgba(188, 255, 47, 0);
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .main-button:hover {
+            box-shadow: 0 0 30px 5px rgba(7, 255, 77, 0.3);
+            border-color: #07FF4D;
+            color: #07FF4D;
+            transform: scale(1.02);
+        }
+        
+        .main-button:active {
+            transform: scale(0.98);
+        }
+        
+        .main-button::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(188, 255, 47, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .main-button:hover::before {
+            opacity: 1;
+        }
+        
+        .button-text {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        .button-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 结果区域样式 */
+        .result-container {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .result-container.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .result-card {
+            background-color: #000000;
+            border: 1px solid #333333;
+            border-radius: 2px;
+            padding: 50px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #BCFF2F;
+            box-shadow: 0 0 10px #07FF4D;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #BCFF2F;
+            letter-spacing: 1px;
+        }
+        
+        .result-subtitle {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            color: #ffffff;
+            position: relative;
+            display: inline-block;
+            padding-left: 20px;
+        }
+        
+        .result-subtitle::before {
+            content: "(";
+            position: absolute;
+            left: 0;
+            color: #BCFF2F;
+        }
+        
+        .result-subtitle::after {
+            content: ")";
+            color: #BCFF2F;
+        }
+        
+        .result-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #dddddd;
+            margin-bottom: 30px;
+        }
+        
+        .result-highlight {
+            color: #BCFF2F;
+            font-weight: 600;
+            text-shadow: 0 0 5px rgba(7, 255, 77, 0.5);
+        }
+        
+        .result-divider {
+            height: 1px;
+            background-color: #333333;
+            margin: 40px 0;
+            position: relative;
+        }
+        
+        .result-divider::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 1px;
+            background-color: #BCFF2F;
+            box-shadow: 0 0 5px #07FF4D;
+        }
+        
+        .result-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 40px;
+            color: #888888;
+            font-size: 0.9rem;
+        }
+        
+        .result-id {
+            letter-spacing: 2px;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .result-action {
+            background: none;
+            border: 1px solid #333333;
+            color: #888888;
+            padding: 8px 16px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .result-action:hover {
+            border-color: #BCFF2F;
+            color: #BCFF2F;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            header {
+                margin-bottom: 60px;
+            }
+            
+            .main-button {
+                width: 150px;
+                height: 150px;
+                font-size: 1rem;
+            }
+            
+            .button-icon {
+                font-size: 2rem;
+            }
+            
+            .result-card {
+                padding: 30px 20px;
+            }
+            
+            .result-title {
+                font-size: 1.5rem;
+            }
+            
+            .result-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .result-content {
+                font-size: 1rem;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 5px rgba(7, 255, 77, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(7, 255, 77, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(7, 255, 77, 0.3);
+            }
+        }
+        
+        .glow {
+            animation: glowPulse 2s infinite;
+        }
+        
+        /* 进度指示器 */
+        .progress-indicator {
+            display: flex;
+            gap: 10px;
+            margin-top: 40px;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #333333;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-dot.active {
+            background-color: #BCFF2F;
+            box-shadow: 0 0 8px #07FF4D;
+        }
+        
+        /* 隐藏类 */
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">OKX PERSONA</div>
+            <div class="tagline">DISCOVER YOUR CRYPTO IDENTITY</div>
+        </header>
+        
+        <button class="main-button glow" id="testButton">
+            <div class="button-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="button-text">
+                <div>开始测试</div>
+                <div>CLICK TO TEST</div>
+            </div>
+        </button>
+        
+        <div class="result-container" id="resultContainer">
+            <div class="result-card">
+                <div class="result-title" id="resultTitle">你的 OKX 人格是</div>
+                <div class="result-subtitle" id="resultSubtitle">DeFi 探索型</div>
+                
+                <div class="result-divider"></div>
+                
+                <div class="result-content" id="resultContent">
+                    <p>新协议、DAO、跨链操作，统统敢上</p>
+                    <p>探索，是你的习惯</p>
+                    <p>折腾，是你的浪漫</p>
+                </div>
+                
+                <div class="result-footer">
+                    <div class="result-id">ID: <span id="resultId">DEFI-EXPLORER</span></div>
+                    <div class="result-actions">
+                        <button class="result-action" id="retryButton">
+                            <i class="fas fa-redo"></i> 重新测试
+                        </button>
+                        <button class="result-action" id="shareButton">
+                            <i class="fas fa-share-alt"></i> 分享结果
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-indicator" id="progressIndicator">
+                <div class="progress-dot active" data-index="0"></div>
+                <div class="progress-dot" data-index="1"></div>
+                <div class="progress-dot" data-index="2"></div>
+                <div class="progress-dot" data-index="3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 人格数据
+        const personalities = [
+            {
+                title: "你的 OKX 人格是",
+                subtitle: "DeFi 探索型",
+                type: "（链上冒险家）",
+                content: [
+                    "新协议、DAO、跨链操作，统统敢上",
+                    "探索，是你的习惯",
+                    "折腾，是你的浪漫"
+                ],
+                id: "DEFI-EXPLORER",
+                color: "#BCFF2F"
+            },
+            {
+                title: "你的 OKX 人格是",
+                subtitle: "合约战士型",
+                type: "（精准执行者）",
+                content: [
+                    "持仓随缘",
+                    "涨了就跑，跌了当存币",
+                    "你把波动当风景",
+                    "时刻保持松弛",
+                    "总能提前一步遇见机会"
+                ],
+                id: "CONTRACT-WARRIOR",
+                color: "#BCFF2F"
+            },
+            {
+                title: "你的 OKX 人格是",
+                subtitle: "理财稳健型",
+                type: "（资产守护者）",
+                content: [
+                    "本金安全第一",
+                    "偏爱低风险、可预测的收益",
+                    "不追风口",
+                    "只守住自己的节奏——",
+                    "稳，才是你最值钱的策略"
+                ],
+                id: "WEALTH-GUARDIAN",
+                color: "#BCFF2F"
+            },
+            {
+                title: "你的 OKX 人格是",
+                subtitle: "现货佛系型",
+                type: "（机会捕手）",
+                content: [
+                    "杠杆高到翘起地球",
+                    "但行情越炸",
+                    "你越冷静",
+                    "深度应用止盈止损",
+                    "精准，是你最强的武器"
+                ],
+                id: "SPOT-TRADER",
+                color: "#BCFF2F"
+            }
+        ];
+        
+        // DOM元素
+        const testButton = document.getElementById('testButton');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultSubtitle = document.getElementById('resultSubtitle');
+        const resultContent = document.getElementById('resultContent');
+        const resultId = document.getElementById('resultId');
+        const retryButton = document.getElementById('retryButton');
+        const shareButton = document.getElementById('shareButton');
+        const progressIndicator = document.getElementById('progressIndicator');
+        const progressDots = document.querySelectorAll('.progress-dot');
+        
+        // 随机选择人格
+        function getRandomPersonality() {
+            const randomIndex = Math.floor(Math.random() * personalities.length);
+            return personalities[randomIndex];
+        }
+        
+        // 显示人格结果
+        function showPersonality(personality) {
+            // 更新内容
+            resultTitle.textContent = personality.title;
+            resultSubtitle.textContent = personality.subtitle;
+            resultId.textContent = personality.id;
+            
+            // 更新内容段落
+            resultContent.innerHTML = '';
+            personality.content.forEach(line => {
+                const p = document.createElement('p');
+                p.textContent = line;
+                
+                // 高亮显示关键词
+                if (line.includes('探索') || line.includes('执行者') || line.includes('稳健') || line.includes('精准')) {
+                    const strong = document.createElement('span');
+                    strong.className = 'result-highlight';
+                    strong.textContent = line;
+                    p.innerHTML = '';
+                    p.appendChild(strong);
+                }
+                
+                resultContent.appendChild(p);
+            });
+            
+            // 显示结果容器
+            resultContainer.classList.add('show');
+            
+            // 隐藏按钮
+            testButton.classList.add('hidden');
+            
+            // 更新进度指示器
+            const personalityIndex = personalities.findIndex(p => p.id === personality.id);
+            updateProgressIndicator(personalityIndex);
+        }
+        
+        // 更新进度指示器
+        function updateProgressIndicator(activeIndex) {
+            progressDots.forEach((dot, index) => {
+                if (index === activeIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        // 重置测试
+        function resetTest() {
+            resultContainer.classList.remove('show');
+            testButton.classList.remove('hidden');
+            
+            // 重置进度指示器
+            progressDots.forEach(dot => dot.classList.remove('active'));
+            progressDots[0].classList.add('active');
+        }
+        
+        // 分享结果
+        function shareResult() {
+            const currentPersonality = personalities.find(p => p.id === resultId.textContent);
+            const shareText = `我的OKX人格是：${currentPersonality.subtitle} ${currentPersonality.type}\n\n${currentPersonality.content.join('\n')}\n\n#OKX人格测试 #区块链`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '我的OKX人格测试结果',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert('结果已复制到剪贴板，可以分享给好友了！');
+                });
+            }
+        }
+        
+        // 事件监听
+        testButton.addEventListener('click', () => {
+            // 添加点击效果
+            testButton.style.boxShadow = '0 0 40px 10px rgba(7, 255, 77, 0.5)';
+            testButton.style.borderColor = '#07FF4D';
+            testButton.style.color = '#07FF4D';
+            
+            // 延迟显示结果，增加悬念感
+            setTimeout(() => {
+                const randomPersonality = getRandomPersonality();
+                showPersonality(randomPersonality);
+                
+                // 重置按钮样式
+                testButton.style.boxShadow = '';
+                testButton.style.borderColor = '';
+                testButton.style.color = '';
+            }, 500);
+        });
+        
+        retryButton.addEventListener('click', resetTest);
+        shareButton.addEventListener('click', shareResult);
+        
+        // 点击进度点可以查看其他人格
+        progressDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const index = parseInt(dot.getAttribute('data-index'));
+                showPersonality(personalities[index]);
+            });
+        });
+        
+        // 初始状态：显示第一个进度点
+        updateProgressIndicator(0);
+    </script>
+</body>
+</html>
